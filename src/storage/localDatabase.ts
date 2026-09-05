@@ -8,7 +8,15 @@ export function initLocalDatabase() {
   if (initialized) return;
   database.execute('PRAGMA journal_mode = WAL;');
   database.execute('PRAGMA synchronous = FULL;');
-  database.execute(`CREATE TABLE IF NOT EXISTS messages (id TEXT PRIMARY KEY NOT NULL, conversation_id TEXT NOT NULL, sender_id TEXT NOT NULL, sender_name TEXT NOT NULL, text TEXT NOT NULL, created_at TEXT NOT NULL, kind TEXT NOT NULL, status TEXT NOT NULL, is_mine INTEGER NOT NULL, server_revision INTEGER, attempt_count INTEGER NOT NULL DEFAULT 0); CREATE TABLE IF NOT EXISTS outbox (id TEXT PRIMARY KEY NOT NULL, message_id TEXT NOT NULL UNIQUE, conversation_id TEXT NOT NULL, priority INTEGER NOT NULL, status TEXT NOT NULL, attempt_count INTEGER NOT NULL DEFAULT 0, next_attempt_at INTEGER NOT NULL, last_error TEXT, created_at INTEGER NOT NULL); CREATE TABLE IF NOT EXISTS sync_leases (name TEXT PRIMARY KEY NOT NULL, owner TEXT NOT NULL, expires_at INTEGER NOT NULL); CREATE TABLE IF NOT EXISTS sync_cursors (conversation_id TEXT PRIMARY KEY NOT NULL, revision INTEGER NOT NULL DEFAULT 0); CREATE TABLE IF NOT EXISTS conflicts (message_id TEXT PRIMARY KEY NOT NULL, local_text TEXT NOT NULL, server_text TEXT NOT NULL, created_at INTEGER NOT NULL); CREATE TABLE IF NOT EXISTS sync_runs (id TEXT PRIMARY KEY NOT NULL, reason TEXT NOT NULL, state TEXT NOT NULL, completed_at INTEGER);`);
+  const schemaStatements = [
+    'CREATE TABLE IF NOT EXISTS messages (id TEXT PRIMARY KEY NOT NULL, conversation_id TEXT NOT NULL, sender_id TEXT NOT NULL, sender_name TEXT NOT NULL, text TEXT NOT NULL, created_at TEXT NOT NULL, kind TEXT NOT NULL, status TEXT NOT NULL, is_mine INTEGER NOT NULL, server_revision INTEGER, attempt_count INTEGER NOT NULL DEFAULT 0);',
+    'CREATE TABLE IF NOT EXISTS outbox (id TEXT PRIMARY KEY NOT NULL, message_id TEXT NOT NULL UNIQUE, conversation_id TEXT NOT NULL, priority INTEGER NOT NULL, status TEXT NOT NULL, attempt_count INTEGER NOT NULL DEFAULT 0, next_attempt_at INTEGER NOT NULL, last_error TEXT, created_at INTEGER NOT NULL);',
+    'CREATE TABLE IF NOT EXISTS sync_leases (name TEXT PRIMARY KEY NOT NULL, owner TEXT NOT NULL, expires_at INTEGER NOT NULL);',
+    'CREATE TABLE IF NOT EXISTS sync_cursors (conversation_id TEXT PRIMARY KEY NOT NULL, revision INTEGER NOT NULL DEFAULT 0);',
+    'CREATE TABLE IF NOT EXISTS conflicts (message_id TEXT PRIMARY KEY NOT NULL, local_text TEXT NOT NULL, server_text TEXT NOT NULL, created_at INTEGER NOT NULL);',
+    'CREATE TABLE IF NOT EXISTS sync_runs (id TEXT PRIMARY KEY NOT NULL, reason TEXT NOT NULL, state TEXT NOT NULL, completed_at INTEGER);',
+  ];
+  schemaStatements.forEach(statement => database.execute(statement));
   initialized = true;
 }
 
