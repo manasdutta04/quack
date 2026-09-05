@@ -1,0 +1,8 @@
+import React from 'react';
+import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Check, CloudOff, LoaderCircle, TriangleAlert} from 'lucide-react-native';
+import {colors, fonts, radius, spacing} from '../theme';
+import {SyncSnapshot} from '../types';
+
+export function SyncPill({snapshot, onPress}: {snapshot: SyncSnapshot; onPress?: () => void}) { const isError = snapshot.state === 'error' || snapshot.failed > 0; const isRunning = snapshot.state === 'running'; const Icon = isError ? TriangleAlert : isRunning ? LoaderCircle : snapshot.queued ? CloudOff : Check; const label = isError ? `${snapshot.failed} needs attention` : isRunning ? snapshot.currentLabel ?? 'Syncing' : snapshot.queued ? `${snapshot.queued} queued offline` : 'Synced just now'; return <Pressable onPress={onPress} style={styles.pill} accessibilityRole="button"><Icon size={15} color={isError ? colors.coral : isRunning ? colors.warm : colors.mint} /><Text style={styles.label}>{label}</Text>{isRunning && <View style={styles.progress}><View style={[styles.progressFill, {width: '58%'}]} /></View>}</Pressable>; }
+const styles = StyleSheet.create({pill: {flexDirection: 'row', alignItems: 'center', gap: spacing.sm, alignSelf: 'flex-start', paddingVertical: 8, paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: 'rgba(255,255,255,0.08)'}, label: {color: colors.paperMuted, fontFamily: fonts.body, fontSize: 12}, progress: {width: 32, height: 3, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.16)', overflow: 'hidden'}, progressFill: {height: 3, borderRadius: 2, backgroundColor: colors.warm}});
